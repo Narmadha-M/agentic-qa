@@ -42,7 +42,7 @@ const PAGES: { name: string; url: string }[] = [
   }
 
   await browser.close();
-})();
+})().catch((e) => { console.error(e); process.exit(1); });
 ```
 
 ### Step 2 — Run it
@@ -211,5 +211,5 @@ The `pixelmatch` threshold is already set to `0.005`. Additionally, skip any pag
 
 - Read/write only within `.visual-regression/` and `./scripts/`.
 - Never delete the `baseline/` directory automatically — always ask the user before overwriting baseline screenshots.
-- If `pixelmatch` or `pngjs` are missing, report the error and suggest `npm install --save-dev pixelmatch pngjs`.
+- If `pixelmatch` or `pngjs` are missing, report the error and suggest `npm install --save-dev pixelmatch pngjs @types/node`.
 - If the git diff is unavailable (not a git repo), skip the intentional/regression classification and mark all diffs as UNKNOWN.
