@@ -1,0 +1,103 @@
+name: E2E QA Suite
+
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+
+jobs:
+  # ── Primary job: Playwright TypeScript tests ───────────────────────────────
+  playwright:
+    name: Playwright E2E Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Flask
+        run: pip install flask
+
+      - name: Start Flask dev server
+        working-directory: shop
+        run: |
+          python app.py &
+          # Wait until the server is accepting connections (max 15 s)
+          for i in $(seq 1 15); do
+            curl -sf http://localhost:5050/ > /dev/null && echo "Flask ready" && break
+            sleep 1
+          done
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright test suite
+        run: npx playwright test
+
+      - name: Upload Playwright HTML report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-${{ github.run_number }}
+          path: playwright-report/
+          retention-days: 30
+
+  # ── Secondary job: existing Python/Selenium regression suite ──────────────
+  selenium:
+    name: Selenium Regression Suite (Python)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python dependencies
+        run: pip install flask selenium chromedriver-autoinstaller
+
+      - name: Install Chrome browser
+        run: |
+          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+          echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+          sudo apt-get update -q
+          sudo apt-get install -y google-chrome-stable
+
+      - name: Start Flask dev server
+        working-directory: shop
+        run: |
+          python app.py &
+          for i in $(seq 1 15); do
+            curl -sf http://localhost:5050/ > /dev/null && echo "Flask ready" && break
+            sleep 1
+          done
+
+      - name: Run Selenium test suite
+        run: python shop/tests/test_shopeasy.py
+
+      - name: Upload Selenium HTML report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: selenium-report-${{ github.run_number }}
+          path: shop/reports/qa_report.html
+          retention-days: 30

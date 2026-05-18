@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}ShopEasy — Cart{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <h2>🛒 Your Cart</h2>
+  <a href="{{ url_for('index') }}" class="btn btn-outline">← Continue Shopping</a>
+</div>
+
+{% if items %}
+<div class="cart-layout">
+  <div class="cart-items">
+    {% for item in items %}
+    <div class="cart-row" data-testid="cart-item" data-product-id="{{ item.id }}">
+      <div class="cart-emoji">{{ item.image }}</div>
+      <div class="cart-info" data-testid="cart-item-info">
+        <h4 data-testid="cart-item-name">{{ item.name }}</h4>
+        <p class="cart-cat">{{ item.category }}</p>
+        <p class="unit-price">${{ "%.2f"|format(item.price) }} each</p>
+      </div>
+      <div class="cart-qty">
+        <form action="{{ url_for('update_cart') }}" method="post" class="qty-form">
+          <input type="hidden" name="product_id" value="{{ item.id }}"/>
+          <button type="submit" name="action" value="decrease" class="qty-btn" data-testid="qty-decrease">−</button>
+          <span class="qty-num" data-testid="qty-num">{{ item.qty }}</span>
+          <button type="submit" name="action" value="increase" class="qty-btn" data-testid="qty-increase">+</button>
+        </form>
+      </div>
+      <div class="cart-sub">
+        <strong data-testid="cart-item-subtotal">${{ "%.2f"|format(item.subtotal) }}</strong>
+        <form action="{{ url_for('update_cart') }}" method="post">
+          <input type="hidden" name="product_id" value="{{ item.id }}"/>
+          <button type="submit" name="action" value="remove" class="remove-btn" data-testid="remove-btn">✕ Remove</button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="cart-summary">
+    <h3>Order Summary</h3>
+    <div class="summary-row">
+      <span>Subtotal</span><span>${{ "%.2f"|format(total) }}</span>
+    </div>
+    <div class="summary-row">
+      <span>Shipping</span><span class="free">FREE</span>
+    </div>
+    <div class="summary-row total-row">
+      <span>Total</span><span>${{ "%.2f"|format(total) }}</span>
+    </div>
+    <a href="{{ url_for('checkout') }}" class="btn btn-primary btn-block" data-testid="checkout-btn">Proceed to Checkout →</a>
+  </div>
+</div>
+
+{% else %}
+<div class="empty-state" data-testid="empty-cart">
+  <div class="empty-icon">🛒</div>
+  <h3>Your cart is empty</h3>
+  <p>Browse our products and add something you like!</p>
+  <a href="{{ url_for('index') }}" class="btn btn-primary" data-testid="shop-now-btn">Shop Now</a>
+</div>
+{% endif %}
+
+{% endblock %}

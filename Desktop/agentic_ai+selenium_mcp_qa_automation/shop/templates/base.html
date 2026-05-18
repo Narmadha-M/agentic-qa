@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}ShopEasy{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"/>
+</head>
+<body>
+  <div class="sale-banner">🔥 MEGA SALE — Up to 40% OFF on selected items! Limited time only.</div>
+  <nav class="navbar">
+    <a href="{{ url_for('index') }}" class="brand" data-testid="nav-brand">🛍️ ShopEasy</a>
+    <div class="nav-links">
+      <a href="{{ url_for('index') }}" data-testid="nav-home">Home</a>
+      <a href="{{ url_for('cart') }}" class="cart-link" data-testid="nav-cart">
+        🛒 Cart
+        {% if cart_count > 0 %}
+          <span class="badge" data-testid="cart-badge">{{ cart_count }}</span>
+        {% endif %}
+      </a>
+    </div>
+  </nav>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-container">
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}" data-testid="flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer>
+    <p>© 2024 ShopEasy — Simple. Fast. Reliable.</p>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}ShopEasy — Order Placed!{% endblock %}
+{% block content %}
+
+<div class="success-page" data-testid="success-page">
+  <div class="success-icon">✅</div>
+  <h1 data-testid="success-title">Order Placed!</h1>
+  <p class="success-msg" data-testid="success-msg">Thank you, <strong>{{ order.name }}</strong>! Your order has been received.</p>
+  <div class="success-details">
+    <div class="detail-row">
+      <span>Items ordered</span>
+      <strong>{{ order['items'] }}</strong>
+    </div>
+    <div class="detail-row">
+      <span>Total charged</span>
+      <strong>${{ "%.2f"|format(order.total) }}</strong>
+    </div>
+    <div class="detail-row">
+      <span>Estimated delivery</span>
+      <strong>3–5 business days</strong>
+    </div>
+  </div>
+  <a href="{{ url_for('index') }}" class="btn btn-primary">Continue Shopping</a>
+</div>
+
+{% endblock %}
