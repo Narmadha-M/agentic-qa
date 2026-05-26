@@ -28,17 +28,28 @@ class TestRunnerAgent:
             existing = env.get("PYTHONPATH", "")
             env["PYTHONPATH"] = str(self.codebase_path) + (os.pathsep + existing if existing else "")
 
-        result = subprocess.run(
-            [sys.executable, "-m", "pytest", str(test_file), "-v", "--tb=short", "--no-header"],
-            capture_output=True,
-            text=True,
-            env=env,
-        )
-        passed = result.returncode == 0
-        output = result.stdout + result.stderr
+        try:
+            result = subprocess.run(
+                [
+                    sys.executable, "-m", "pytest", str(test_file),
+                    "-v", "--tb=short", "--no-header",
+                    "--timeout=30",   # per-test timeout (requires pytest-timeout)
+                ],
+                capture_output=True,
+                text=True,
+                env=env,
+                timeout=120,          # per-file hard kill after 2 minutes
+            )
+            passed = result.returncode == 0
+            output = result.stdout + result.stderr
+        except subprocess.TimeoutExpired:
+            passed = False
+            output = f"[Runner] TIMEOUT: {test_file.name} exceeded 120s — killed.\n"
+            log(f"[Runner] TIMEOUT: {test_file.name}")
+
         return {
             "file": test_file.name,
             "passed": passed,
-            "returncode": result.returncode,
+            "returncode": 0 if passed else 1,
             "output": output,
         }
