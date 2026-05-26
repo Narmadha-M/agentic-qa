@@ -7,7 +7,12 @@ from pathlib import Path
 from core.models import SourceModule
 from utils.logger import log
 
-SKIP_DIRS = {".git", "__pycache__", ".venv", "venv", "node_modules", ".tox", "dist", "build"}
+SKIP_DIRS = {
+    ".git", "__pycache__", ".venv", "venv", "node_modules",
+    ".tox", "dist", "build",
+    # skip generated/test-only dirs — they're not source to test
+    "migrations", "tests", "tests_output",
+}
 
 
 class IngestAgent:

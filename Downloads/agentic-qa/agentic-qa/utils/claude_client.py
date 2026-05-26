@@ -11,7 +11,7 @@ from utils.logger import log
 
 MODEL = "anthropic/claude-sonnet-4-5"
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
-MAX_TOKENS = 4096
+MAX_TOKENS = 8192
 
 
 def ask_claude(prompt: str, system: str = "") -> str:
