@@ -94,7 +94,7 @@ class TestHandleChange:
         orch.ingest.ingest_file.return_value = module
         orch.writer.generate.return_value = test_file
         orch.runner.run_file.return_value = {"passed": True, "file": "test_mod.py", "output": ""}
-        orch._handle_change(tmp / "mod.py")
+        orch._handle_local_change(tmp / "mod.py")
         orch.writer.generate.assert_called_once()
 
     def test_updates_existing_test_when_present(self, mock_orchestrator):
@@ -108,13 +108,13 @@ class TestHandleChange:
         orch.differ.diff.return_value = {"summary": "changed", "added": [], "removed": []}
         orch.writer.update.return_value = test_file
         orch.runner.run_file.return_value = {"passed": True, "file": "test_mod.py", "output": ""}
-        orch._handle_change(module.path)
+        orch._handle_local_change(module.path)
         orch.writer.update.assert_called_once()
 
     def test_skips_when_ingest_returns_none(self, mock_orchestrator):
         orch, tmp = mock_orchestrator
         orch.ingest.ingest_file.return_value = None
-        orch._handle_change(tmp / "ghost.py")
+        orch._handle_local_change(tmp / "ghost.py")
         orch.writer.generate.assert_not_called()
 
     def test_snapshots_new_version_after_change(self, mock_orchestrator):
@@ -125,7 +125,7 @@ class TestHandleChange:
         orch.ingest.ingest_file.return_value = module
         orch.writer.generate.return_value = test_file
         orch.runner.run_file.return_value = {"passed": True, "file": "test_mod.py", "output": ""}
-        orch._handle_change(module.path)
+        orch._handle_local_change(module.path)
         orch.differ.snapshot.assert_called_once_with(module.path, module.source_code)
 
 
